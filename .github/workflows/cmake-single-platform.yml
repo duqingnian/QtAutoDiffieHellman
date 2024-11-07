@@ -2,15 +2,15 @@ name: CMake Build and Release on a Single Platform
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - 'v*'  # 匹配版本号格式的 tag，例如 v1.0, v1.1 等
+  workflow_dispatch:
 
 env:
   BUILD_TYPE: Release
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: '6.5.0'  # 使用可用的 Qt 版本
+        version: '6.5.0'  # 可用的 Qt 版本
         modules: qtbase,qttools
 
     - name: Install dependencies
@@ -32,20 +32,21 @@ jobs:
         CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake
       run: |
         cmake -B build/Server -S Server -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-        cmake --build build/Server
+        cmake --build build/Server --config Release
 
     - name: Configure and build Client
       env:
         CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake
       run: |
         cmake -B build/Client -S Client -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-        cmake --build build/Client
+        cmake --build build/Client --config Release
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: build-output
-        path: |
+        files: |
           build/Server/*.exe
           build/Client/*.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
