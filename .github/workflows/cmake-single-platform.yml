@@ -7,7 +7,6 @@ on:
     branches: [ "main" ]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
 jobs:
@@ -24,15 +23,15 @@ jobs:
 
     - name: Configure and build Server
       run: |
-        cmake -B build/server -S server -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-        cmake --build build/server
+        cmake -B build/Server -S Server -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake --build build/Server
 
     - name: Configure and build Client
       run: |
-        cmake -B build/client -S client -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-        cmake --build build/client
+        cmake -B build/Client -S Client -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake --build build/Client
 
     - name: Run tests
       run: |
-        cd build/client  # 或者指向包含测试的项目
+        cd build/Client  # 或者指向包含测试的项目
         ctest --output-on-failure
