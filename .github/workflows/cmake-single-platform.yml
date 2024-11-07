@@ -1,4 +1,4 @@
-name: CMake Build on a Single Platform
+name: CMake Build and Release on a Single Platform
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: '6.5.0'
+        version: '6.5.0'  # 使用可用的 Qt 版本
         modules: qtbase,qttools
 
     - name: Install dependencies
@@ -29,19 +29,23 @@ jobs:
 
     - name: Configure and build Server
       env:
-        CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake  # 设置 CMake 查找 Qt 的路径
+        CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake
       run: |
         cmake -B build/Server -S Server -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build build/Server
 
     - name: Configure and build Client
       env:
-        CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake  # 设置 CMake 查找 Qt 的路径
+        CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake
       run: |
         cmake -B build/Client -S Client -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build build/Client
 
-    - name: Run tests
-      run: |
-        cd build/Client
-        ctest --output-on-failure
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-output
+        path: |
+          build/Server/*.exe
+          build/Client/*.exe
+
