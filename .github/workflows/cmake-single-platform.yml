@@ -1,6 +1,4 @@
-# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
-name: CMake on a single platform
+name: CMake Build on a Single Platform
 
 on:
   push:
@@ -14,18 +12,10 @@ env:
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Install dependencies
       run: |
@@ -34,16 +24,15 @@ jobs:
 
     - name: Configure and build Server
       run: |
-        cmake -B build/server -S server -DOPENSSL_ROOT_DIR=/usr/lib/ssl
+        cmake -B build/server -S server -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build build/server
 
     - name: Configure and build Client
       run: |
-        cmake -B build/client -S client -DOPENSSL_ROOT_DIR=/usr/lib/ssl
+        cmake -B build/client -S client -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build build/client
 
     - name: Run tests
       run: |
         cd build/client  # 或者指向包含测试的项目
         ctest --output-on-failure
-
