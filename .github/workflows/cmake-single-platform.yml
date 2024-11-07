@@ -16,22 +16,32 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: '6.8.0'  # 使用 Qt 6.8.0
+        modules: qtbase,qttools
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libssl-dev  # 安装 OpenSSL 库
 
     - name: Configure and build Server
+      env:
+        CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake  # 设置 CMake 查找 Qt 的路径
       run: |
         cmake -B build/Server -S Server -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build build/Server
 
     - name: Configure and build Client
+      env:
+        CMAKE_PREFIX_PATH: ${{ env.QT_INSTALL_PATH }}/lib/cmake  # 设置 CMake 查找 Qt 的路径
       run: |
         cmake -B build/Client -S Client -DOPENSSL_ROOT_DIR=/usr/lib/ssl -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build build/Client
 
     - name: Run tests
       run: |
-        cd build/Client  # 或者指向包含测试的项目
+        cd build/Client
         ctest --output-on-failure
