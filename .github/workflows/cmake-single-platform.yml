@@ -34,11 +34,16 @@ jobs:
 
     - name: Configure and build Server
       run: |
-        cmake -B build/Server -S Server -DOPENSSL_ROOT_DIR=/usr/lib/ssl
-        cmake --build build/Server
+        cmake -B build/server -S server -DOPENSSL_ROOT_DIR=/usr/lib/ssl
+        cmake --build build/server
 
     - name: Configure and build Client
       run: |
-        cmake -B build/Client -S Client -DOPENSSL_ROOT_DIR=/usr/lib/ssl
-        cmake --build build/Client
+        cmake -B build/client -S client -DOPENSSL_ROOT_DIR=/usr/lib/ssl
+        cmake --build build/client
+
+    - name: Run tests
+      run: |
+        cd build/client  # 或者指向包含测试的项目
+        ctest --output-on-failure
 
